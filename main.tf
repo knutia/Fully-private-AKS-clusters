@@ -65,6 +65,7 @@ resource "azurerm_public_ip" "example" {
   resource_group_name = module.networks_rg.resource_name
   allocation_method   = "Static"
   sku                 = "Standard"
+  depends_on = [module.networks_rg]
 }
 
 resource "azurerm_firewall" "example" {
@@ -77,6 +78,7 @@ resource "azurerm_firewall" "example" {
     subnet_id            = module.hub_vnet.vnet_subnets[0]
     public_ip_address_id = azurerm_public_ip.example.id
   }
+  depends_on = [module.networks_rg, module.hub_vnet, azurerm_public_ip.example]
 }
 
 // FW_PRIVATE_IP = azurerm_firewall.example.ip_configuration.private_ip_address
@@ -92,6 +94,7 @@ resource "azurerm_route_table" "example" {
     next_hop_type          = "VirtualAppliance"
     next_hop_in_ip_address = azurerm_firewall.example.ip_configuration[0].private_ip_address
   }
+  depends_on = [module.networks_rg, azurerm_firewall.example]
 }
 
 // resource "azurerm_route" "example" {
@@ -106,6 +109,7 @@ resource "azurerm_route_table" "example" {
 resource "azurerm_subnet_route_table_association" "example" {
   subnet_id      = module.kube_vnet.vnet_subnets[1]
   route_table_id = azurerm_route_table.example.id
+  depends_on = [module.kube_vnet, azurerm_route_table.example]
 }
 
 resource "azurerm_firewall_network_rule_collection" "time" {
@@ -114,6 +118,7 @@ resource "azurerm_firewall_network_rule_collection" "time" {
   resource_group_name = module.networks_rg.resource_name
   priority            = 101
   action              = "Allow"
+  depends_on = [module.networks_rg, azurerm_firewall.example]
 
   rule {
     name        = "allow network"
@@ -143,6 +148,7 @@ resource "azurerm_firewall_network_rule_collection" "dns" {
   resource_group_name = module.networks_rg.resource_name
   priority            = 102
   action              = "Allow"
+  depends_on = [module.networks_rg, azurerm_firewall.example]
 
   rule {
     name        = "allow network"
@@ -172,6 +178,7 @@ resource "azurerm_firewall_network_rule_collection" "servicetags" {
   resource_group_name = module.networks_rg.resource_name
   priority            = 110
   action              = "Allow"
+  depends_on = [module.networks_rg, azurerm_firewall.example]
 
   rule {
     name        = "allow service tags"
@@ -204,6 +211,7 @@ resource "azurerm_firewall_application_rule_collection" "aksfwar" {
   resource_group_name = module.networks_rg.resource_name
   priority            = 101
   action              = "Allow"
+  depends_on = [module.networks_rg, azurerm_firewall.example]
 
   rule {
     name = "fqdn"
@@ -233,6 +241,7 @@ resource "azurerm_firewall_application_rule_collection" "osupdates" {
   resource_group_name = module.networks_rg.resource_name
   priority            = 102
   action              = "Allow"
+  depends_on = [module.networks_rg, azurerm_firewall.example]
 
   rule {
     name = "allow network"
@@ -293,5 +302,5 @@ module "aks" {
     configuration = "terraform"
     system        = "S07373"
   }
-  depends_on = [module.kube_rg]
+  depends_on = [module.kube_rg, module.kube_vnet]
 }
