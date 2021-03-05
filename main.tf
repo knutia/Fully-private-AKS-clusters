@@ -272,6 +272,70 @@ resource "azurerm_firewall_application_rule_collection" "osupdates" {
   }
 }
 
+resource "azurerm_firewall_application_rule_collection" "aksdependencies" {
+  name                = "aksdependencies"
+  azure_firewall_name = azurerm_firewall.example.name
+  resource_group_name = module.networks_rg.resource_name
+  priority            = 103
+  action              = "Allow"
+  depends_on          = [module.networks_rg, azurerm_firewall.example]
+
+  rule {
+    name = "allow network"
+
+    source_addresses = [
+      "*",
+    ]
+
+    target_fqdns = [
+      "*.hcp.westeurope.azmk8s.io",
+      "mcr.microsoft.com",
+      "*.data.mcr.microsoft.com",
+      "management.azure.com",
+      "login.microsoftonline.com",
+      "acs-mirror.azureedge.net",
+    ]
+
+    protocol {
+      port = "443"
+      type = "Https"
+    }
+  }
+}
+
+resource "azurerm_firewall_application_rule_collection" "dockerhub" {
+  name                = "dockerhub"
+  azure_firewall_name = azurerm_firewall.example.name
+  resource_group_name = module.networks_rg.resource_name
+  priority            = 104
+  action              = "Allow"
+  depends_on          = [module.networks_rg, azurerm_firewall.example]
+
+  rule {
+    name = "allow network"
+
+    source_addresses = [
+      "*",
+    ]
+
+    target_fqdns = [
+      "*auth.docker.io",
+      "*cloudflare.docker.io",
+      "*cloudflare.docker.com",
+      "*registry-1.docker.io",
+    ]
+
+    protocol {
+      port = "80"
+      type = "Http"
+    }
+    protocol {
+      port = "443"
+      type = "Https"
+    }
+  }
+}
+
 
 module "aks" {
   source                          = "./aks"
@@ -302,5 +366,5 @@ module "aks" {
     configuration = "terraform"
     system        = "S07373"
   }
-  depends_on = [module.kube_rg, module.kube_vnet]
+  depends_on = [module.kube_rg, module.kube_vnet, azurerm_firewall_application_rule_collection.aksdependencies]
 }
