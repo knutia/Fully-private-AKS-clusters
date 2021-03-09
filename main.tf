@@ -18,8 +18,8 @@ module "hub_vnet" {
   resource_group_name     = module.networks_rg.resource_name
   resource_group_location = module.networks_rg.location
   address_space           = ["10.0.0.0/22"]
-  subnet_prefixes         = ["10.0.0.0/24", "10.0.1.0/24"]
-  subnet_names            = ["AzureFirewallSubnet", "jumpbox-subnet"]
+  subnet_prefixes         = ["10.0.0.0/24", "10.0.1.0/24", "10.0.2.0/27"]
+  subnet_names            = ["AzureFirewallSubnet", "jumpbox-subnet", "GatewaySubnet"]
   tags = {
     configuration = "terraform"
     system        = "S07373"
@@ -367,4 +367,45 @@ module "aks" {
     system        = "S07373"
   }
   depends_on = [module.kube_rg, module.kube_vnet, azurerm_firewall_application_rule_collection.aksdependencies]
+}
+
+# https://github.com/kumarvna/terraform-azurerm-vpn-gateway
+# https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/virtual_network_gateway
+module "vpn-gateway" {
+  source  = "kumarvna/vpn-gateway/azurerm"
+  version = "1.0.0"
+
+  # Resource Group, location, VNet and Subnet details
+  resource_group_name  = module.networks_rg.resource_name
+  virtual_network_name = module.hub_vnet.vnet_name
+  vpn_gateway_name     = "hub1-firewalvnet-vpn-gw01"
+
+  # client configuration for Point-to-Site VPN Gateway connections
+  vpn_client_configuration = {
+    address_space        = "172.16.201.0/24"
+    vpn_client_protocols = ["SSTP", "IkeV2"]
+    certificate          = <<EOF
+MIIC5zCCAc+gAwIBAgIQEbF3+aitX6NKW6pMgsi2uTANBgkqhkiG9w0BAQsFADAW
+MRQwEgYDVQQDDAtQMlNSb290Q2VydDAeFw0yMTAzMDkwNzE2MzdaFw0yMjAzMDkw
+NzM2MzdaMBYxFDASBgNVBAMMC1AyU1Jvb3RDZXJ0MIIBIjANBgkqhkiG9w0BAQEF
+AAOCAQ8AMIIBCgKCAQEAoet6dkAFsnqq6uKi7RrnrCU5JTlnw/65nahie2pSNp+R
+VDSpd2m43sm3OuDjBkT1vy9dasNFYDVUjMhwaFnAIcuU6YKESqen76wxSj33Z0D+
+IsEqWgB5EOudCMoVc2CO9qpIwenjKCOiDeYxKonQuRbaSoP/oyFBbg+IGfwqdgjD
+K7RZQCKh+Cd1XeIztCo/svcdbTKhl/V9j5wA8LPR9pkMtih6XyiWR75nkjZvMFy0
+umVQC7KZNO0NFLXVsts9Rp8YKbInmxhZ/leplInbizW3NcbdN7Jyjk/aiTh6R1Q1
+McWJ+S0fAD97HSjcyCprPZrLlrZKwzse6jQKt+ZPfQIDAQABozEwLzAOBgNVHQ8B
+Af8EBAMCAgQwHQYDVR0OBBYEFG9yYQtUxn80Dn0KyOF09THgE62zMA0GCSqGSIb3
+DQEBCwUAA4IBAQA59L7KeejWDFw0ZLus7lSlZ8iE1m/oJJQ5SsbrDWRac/EflDf7
+QQnWn0A5nLYPfvbc/98VALMZ/1SnM40IYCHcDU56YrBqt7xQqkZi6cNzU3qBXvoh
+Ku0+fsvRTraJux+Q7fp5tpDA5yCGgyXmiizF3CrdLHa9+Y+IgiN20eXhwCBssiXr
+lLMOdTiabqetwk0wiMnbaAYEgOoUyFltnZBkoyZA4rRFQAN+a/N09IJiYqOsoFU1
+HjEVFiPYv4c89DJPZ/ZnIKzXxUJdIyBBBpH/q5nS5wPRPzYcc9SqaV1b465dXdSf
+LRSE2MHgTOqLvXV6F7p+R72C61JdFEVr0tug
+EOF
+  }
+  # Adding TAG's to your Azure resources (Required)
+  tags = {
+    configuration = "terraform"
+    system        = "S07373"
+  }
 }
