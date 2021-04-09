@@ -372,8 +372,9 @@ module "aks" {
 # https://github.com/kumarvna/terraform-azurerm-vpn-gateway
 # https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/virtual_network_gateway
 module "vpn-gateway" {
-  source  = "kumarvna/vpn-gateway/azurerm"
-  version = "1.0.0"
+  # source  = "kumarvna/vpn-gateway/azurerm"
+  # version = "1.0.0"
+  source                          = "./vpn"
 
   # Resource Group, location, VNet and Subnet details
   resource_group_name  = module.networks_rg.resource_name
@@ -385,22 +386,22 @@ module "vpn-gateway" {
     address_space        = "172.16.201.0/24"
     vpn_client_protocols = ["SSTP", "IkeV2"]
     certificate          = <<EOF
-MIIC5zCCAc+gAwIBAgIQEbF3+aitX6NKW6pMgsi2uTANBgkqhkiG9w0BAQsFADAW
-MRQwEgYDVQQDDAtQMlNSb290Q2VydDAeFw0yMTAzMDkwNzE2MzdaFw0yMjAzMDkw
-NzM2MzdaMBYxFDASBgNVBAMMC1AyU1Jvb3RDZXJ0MIIBIjANBgkqhkiG9w0BAQEF
-AAOCAQ8AMIIBCgKCAQEAoet6dkAFsnqq6uKi7RrnrCU5JTlnw/65nahie2pSNp+R
-VDSpd2m43sm3OuDjBkT1vy9dasNFYDVUjMhwaFnAIcuU6YKESqen76wxSj33Z0D+
-IsEqWgB5EOudCMoVc2CO9qpIwenjKCOiDeYxKonQuRbaSoP/oyFBbg+IGfwqdgjD
-K7RZQCKh+Cd1XeIztCo/svcdbTKhl/V9j5wA8LPR9pkMtih6XyiWR75nkjZvMFy0
-umVQC7KZNO0NFLXVsts9Rp8YKbInmxhZ/leplInbizW3NcbdN7Jyjk/aiTh6R1Q1
-McWJ+S0fAD97HSjcyCprPZrLlrZKwzse6jQKt+ZPfQIDAQABozEwLzAOBgNVHQ8B
-Af8EBAMCAgQwHQYDVR0OBBYEFG9yYQtUxn80Dn0KyOF09THgE62zMA0GCSqGSIb3
-DQEBCwUAA4IBAQA59L7KeejWDFw0ZLus7lSlZ8iE1m/oJJQ5SsbrDWRac/EflDf7
-QQnWn0A5nLYPfvbc/98VALMZ/1SnM40IYCHcDU56YrBqt7xQqkZi6cNzU3qBXvoh
-Ku0+fsvRTraJux+Q7fp5tpDA5yCGgyXmiizF3CrdLHa9+Y+IgiN20eXhwCBssiXr
-lLMOdTiabqetwk0wiMnbaAYEgOoUyFltnZBkoyZA4rRFQAN+a/N09IJiYqOsoFU1
-HjEVFiPYv4c89DJPZ/ZnIKzXxUJdIyBBBpH/q5nS5wPRPzYcc9SqaV1b465dXdSf
-LRSE2MHgTOqLvXV6F7p+R72C61JdFEVr0tug
+MIIC5zCCAc+gAwIBAgIQEosePIVAeJNHTJTYY67bRjANBgkqhkiG9w0BAQsFADAW
+MRQwEgYDVQQDDAtQMlNSb290Q2VydDAeFw0yMTA0MDYxMDIyMjZaFw0yMjA0MDYx
+MDQyMjZaMBYxFDASBgNVBAMMC1AyU1Jvb3RDZXJ0MIIBIjANBgkqhkiG9w0BAQEF
+AAOCAQ8AMIIBCgKCAQEAqstLBzMYZ7feKcCLXxRbTQbMqp46Zb6wG+2mvm62gjk5
+66MrHcowTNTdm2FdNRAEFTLQAGceWGRRCPHvtqzOlbOTgB/7nAcZLJldGY+glrl6
+4lpcfJ6LHin3kLNt1C4BogvHGUDRWFsNM+xTsJl1BNy0bzU2cIfyOjLx0h6Mz87A
+u16oE9AdJwdsn+z8ZINqddYZCLrXTcUpWOT8zywhy4ggsASfURE2IRt9vh45Ewmm
+s06RphxXR6/PYs3DvFx7qTkAtmjBD9fZlvnRqZia8qxa1kTjsOPzTS5Emhq6Toaw
+knrWlMYwMwi+b79pvMBjeBVCTl+Yvdkn4WG6tfKizQIDAQABozEwLzAOBgNVHQ8B
+Af8EBAMCAgQwHQYDVR0OBBYEFGZfWt6l0RiQGlXc0lR4J+OZSZJfMA0GCSqGSIb3
+DQEBCwUAA4IBAQBxdOroYXF4bma2y3FWV8bi1b5RDIIgvUPZOrFz6KnKtb1X3LiO
+BU8lUWNqHwigyBtde/3zBxc2JtUyhwgbA8A+Wm2k3fX1g93F/TLCw07uiaLMRgfz
+/8Rqi14Zen3W4Jx65W69998h7R4dbWtPSx8T9WKChzjzgpQFZtH14EYmKu0Sv/Js
+cehkERIym8bRpj903dcuNHdAqaufWudtz1YuM695knKyXsfYWH/mXX++1RZ4qVov
+hBqoYvF7v89bOTYT9dmZnsTJtGvEXesxRJx+UTLBlshdFgH6hiH5wD0OHOna3MlA
+Fjjx1IU0TkurRlYn2ZOmJYVhOMdGq+wTGWIX
 EOF
   }
   # Adding TAG's to your Azure resources (Required)

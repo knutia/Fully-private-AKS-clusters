@@ -13,29 +13,29 @@ output "aks_name" {
   description = "The Name of the Azure Kubernetes Managed Cluster."
 }
 
-output "host" {
-  value       = azurerm_kubernetes_cluster.aks.kube_admin_config.0.host
-  sensitive   = true
-  description = "The HOST NAME of the Azure Kubernetes Managed Cluster."
-}
+# output "host" {
+#   value       = azurerm_kubernetes_cluster.aks.kube_admin_config.0.host
+#   sensitive   = true
+#   description = "The HOST NAME of the Azure Kubernetes Managed Cluster."
+# }
 
-output "client_certificate" {
-  value       = azurerm_kubernetes_cluster.aks.kube_admin_config.0.client_certificate
-  sensitive   = true
-  description = "The Client Certificate of the Azure Kubernetes Managed Cluster."
-}
+# output "client_certificate" {
+#   value       = azurerm_kubernetes_cluster.aks.kube_admin_config.0.client_certificate
+#   sensitive   = true
+#   description = "The Client Certificate of the Azure Kubernetes Managed Cluster."
+# }
 
-output "client_key" {
-  value       = azurerm_kubernetes_cluster.aks.kube_admin_config.0.client_key
-  sensitive   = true
-  description = "The Client Key of the Azure Kubernetes Managed Cluster."
-}
+# output "client_key" {
+#   value       = azurerm_kubernetes_cluster.aks.kube_admin_config.0.client_key
+#   sensitive   = true
+#   description = "The Client Key of the Azure Kubernetes Managed Cluster."
+# }
 
-output "cluster_ca_certificate" {
-  value       = azurerm_kubernetes_cluster.aks.kube_admin_config.0.cluster_ca_certificate
-  sensitive   = true
-  description = "The Cluster CA Certificate of the Azure Kubernetes Managed Cluster."
-}
+# output "cluster_ca_certificate" {
+#   value       = azurerm_kubernetes_cluster.aks.kube_admin_config.0.cluster_ca_certificate
+#   sensitive   = true
+#   description = "The Cluster CA Certificate of the Azure Kubernetes Managed Cluster."
+# }
 
 output "rg_name" {
   value       = azurerm_kubernetes_cluster.aks.resource_group_name

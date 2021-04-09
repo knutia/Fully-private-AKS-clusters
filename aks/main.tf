@@ -23,6 +23,7 @@ resource "azurerm_kubernetes_cluster" "aks" {
   resource_group_name = var.resource_group_name
   kubernetes_version  = var.kubernetes_version
   # private_link_enabled = true
+  private_cluster_enabled = true
 
   default_node_pool {
     name                 = "default"
