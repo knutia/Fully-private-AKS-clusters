@@ -35,6 +35,7 @@ module "kube_vnet" {
   address_space           = ["10.0.4.0/22"]
   subnet_prefixes         = ["10.0.4.0/24", "10.0.5.0/24"]
   subnet_names            = ["ing-1-subnet", "aks-2-subnet"]
+  subnet_enforce_private_link_endpoint_network_policies = {ing-1-subnet = false, aks-2-subnet = true}
   tags = {
     configuration = "terraform"
     system        = "S07373"
@@ -49,6 +50,8 @@ resource "azurerm_virtual_network_peering" "example-1" {
   virtual_network_name      = module.hub_vnet.vnet_name
   remote_virtual_network_id = module.kube_vnet.vnet_id
   depends_on                = [module.networks_rg, module.hub_vnet, module.kube_vnet]
+  allow_gateway_transit     = true
+
 }
 
 resource "azurerm_virtual_network_peering" "example-2" {
@@ -57,6 +60,7 @@ resource "azurerm_virtual_network_peering" "example-2" {
   virtual_network_name      = module.kube_vnet.vnet_name
   remote_virtual_network_id = module.hub_vnet.vnet_id
   depends_on                = [module.networks_rg, module.hub_vnet, module.kube_vnet]
+  use_remote_gateways       = true
 }
 
 resource "azurerm_public_ip" "example" {
@@ -374,7 +378,7 @@ module "aks" {
 module "vpn-gateway" {
   # source  = "kumarvna/vpn-gateway/azurerm"
   # version = "1.0.0"
-  source                          = "./vpn"
+  source = "./vpn"
 
   # Resource Group, location, VNet and Subnet details
   resource_group_name  = module.networks_rg.resource_name
