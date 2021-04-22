@@ -28,14 +28,14 @@ module "hub_vnet" {
 }
 
 module "kube_vnet" {
-  source                  = "./vnet"
-  vnet_name               = "spoke1-kubevnet"
-  resource_group_name     = module.networks_rg.resource_name
-  resource_group_location = module.networks_rg.location
-  address_space           = ["10.0.4.0/22"]
-  subnet_prefixes         = ["10.0.4.0/24", "10.0.5.0/24"]
-  subnet_names            = ["ing-1-subnet", "aks-2-subnet"]
-  subnet_enforce_private_link_endpoint_network_policies = {ing-1-subnet = false, aks-2-subnet = true}
+  source                                                = "./vnet"
+  vnet_name                                             = "spoke1-kubevnet"
+  resource_group_name                                   = module.networks_rg.resource_name
+  resource_group_location                               = module.networks_rg.location
+  address_space                                         = ["10.0.4.0/22"]
+  subnet_prefixes                                       = ["10.0.4.0/24", "10.0.5.0/24"]
+  subnet_names                                          = ["ing-1-subnet", "aks-2-subnet"]
+  subnet_enforce_private_link_endpoint_network_policies = { ing-1-subnet = false, aks-2-subnet = true }
   tags = {
     configuration = "terraform"
     system        = "S07373"
@@ -298,6 +298,7 @@ resource "azurerm_firewall_application_rule_collection" "aksdependencies" {
       "management.azure.com",
       "login.microsoftonline.com",
       "acs-mirror.azureedge.net",
+      "k8s.gcr.io",
     ]
 
     protocol {
@@ -342,28 +343,27 @@ resource "azurerm_firewall_application_rule_collection" "dockerhub" {
 
 
 module "aks" {
-  source                          = "./aks"
-  aks_name                        = "dzpraks1"
-  aks_location                    = module.kube_rg.location
-  dns_prefix                      = "dzpraks1"
-  resource_group_name             = module.kube_rg.resource_name
-  kubernetes_version              = "1.18.10"
-  node_count                      = 1
-  vm_size                         = "Standard_D4s_v3"
-  os_disk_size_gb                 = 30
-  ilb_subnet_id                   = "/subscriptions/cf9244f0-70e0-42c0-b545-e21b08c2867a/resourceGroups/t-exp-rg-common-infra/providers/Microsoft.Network/virtualNetworks/t-exp-Shared-Management-vnet/subnets/t-exp-snet-dc-aks-ilb"
-  vnet_subnet_id                  = module.kube_vnet.vnet_subnets[1]
-  max_node_count                  = 1
-  min_node_count                  = 1
-  api_server_authorized_ip_ranges = "10.182.128.0/18"
-  #rbac_admin_groups                         = ["858aa64d-1b61-415b-aec9-d505442380ba"]
+  source                                    = "./aks"
+  aks_name                                  = "dzpraks1"
+  aks_location                              = module.kube_rg.location
+  dns_prefix                                = "dzpraks1"
+  resource_group_name                       = module.kube_rg.resource_name
+  kubernetes_version                        = "1.18.14"
+  node_count                                = 1
+  vm_size                                   = "Standard_D4s_v3"
+  os_disk_size_gb                           = 30
+  ilb_subnet_id                             = module.kube_vnet.vnet_subnets[0]
+  vnet_subnet_id                            = module.kube_vnet.vnet_subnets[1]
+  max_node_count                            = 1
+  min_node_count                            = 1
+  api_server_authorized_ip_ranges           = "10.182.128.0/18"
   network_plugin                            = "azure"
   network_policy                            = "calico"
   service_cidr                              = "192.168.0.0/16"
   dns_service_ip                            = "192.168.0.10"
   docker_bridge_cidr                        = "172.22.0.1/29"
   monitor_diagnostic_setting_enable         = false
-  role_assignment_NetworkContributor_enable = false
+  role_assignment_NetworkContributor_enable = true
   container_registry_id                     = "EMPTY"
   azurerm_log_analytics_workspace_id        = "EMPTY"
   tags = {
@@ -371,6 +371,7 @@ module "aks" {
     system        = "S07373"
   }
   depends_on = [module.kube_rg, module.kube_vnet, azurerm_firewall_application_rule_collection.aksdependencies]
+  #rbac_admin_groups                         = ["858aa64d-1b61-415b-aec9-d505442380ba"]
 }
 
 # https://github.com/kumarvna/terraform-azurerm-vpn-gateway
